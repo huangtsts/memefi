@@ -19,9 +19,7 @@ def load_proxies():
 
 proxies = load_proxies()
 
-
-    #HANDLE ALL ERRORS PUT THEM HERE SAFE_POST
-    
+# HANDLE ALL ERRORS, PUT THEM HERE SAFE_POST
 def safe_post(url, headers, json_payload):
     retries = 5
     timeout = 5  # Timeout in seconds for each connection attempt
@@ -49,21 +47,11 @@ def safe_post(url, headers, json_payload):
             res = conn.getresponse()
             response_data = res.read().decode("utf-8")
             if res.status == 200:
-                
-            # Assign access_token if it's in the response
-            json_data = json.loads(response_data)
-            if 'data' in json_data and 'accessToken' in json_data['data']:
-                global access_token
-                access_token = json_data['data']['accessToken']
-                print(f"Access token retrieved: {access_token}")
+                return json.loads(response_data)  # Return the JSON response if successful
             else:
-                print("Failed to retrieve access token.")
-            return json_data
-      # Return the JSON response if successful
-            else:
-                print(f"❌ Failed with status {res.status}, trying again")
+                print(f"❌ Failed with status {res.status}, trying again ")
         except (http.client.HTTPException, TimeoutError) as e:
-            print(f"❌ Error: {e}, trying again")
+            print(f"❌ Error: {e}, trying again ")
         if attempt < retries - 1:  # If this is not the last attempt, wait before trying again
             time.sleep(10)
         else:
@@ -75,11 +63,8 @@ def generate_random_nonce(length=52):
     characters = string.ascii_letters + string.digits
     return ''.join(random.choice(characters) for _ in range(length))
 
-# Get access token
-
+# Getting access token
 def fetch(account_line):
-    global access_token  # Declare access_token as global to use it throughout the script
-    
     with open('query_id.txt', 'r') as file:
         lines = file.readlines()
         raw_data = lines[account_line - 1].strip()
@@ -124,26 +109,12 @@ def fetch(account_line):
     res = conn.getresponse()
     response_data = res.read().decode("utf-8")
 
-    if res.status == 200:
-        try:
-            json_response = json.loads(response_data)
-            if 'errors' in json_response:
-                return None
-            else:
-                access_token = json_response['data']['telegramUserLogin']['access_token']
-                return access_token
-        except json.JSONDecodeError:
-            print("Failed to decode JSON response")
-            return None
-    else:
-        return None
-
-# Check access token
+  # Check access token
 def cek_user(index):
     access_token = fetch(index + 1)
     url = "api-gw-tg.memefi.club"
 
-    headers = headers_set.copy()  # Make a copy of headers_set to avoid changing the global variable
+    headers = headers_set.copy()  # Create a copy of headers_set so as not to modify the global variable
     headers['Authorization'] = f'Bearer {access_token}'
 
     json_payload = {
@@ -164,28 +135,28 @@ def activate_energy_recharge_booster(index, headers):
     access_token = fetch(index + 1)
     url = "api-gw-tg.memefi.club"
 
-headers = headers_set.copy()  # Make a copy of headers_set to avoid changing the global variable
-headers['Authorization'] = f'Bearer {access_token}'
+    headers = headers_set.copy()  # Create a copy of headers_set so as not to modify the global variable
+    headers['Authorization'] = f'Bearer {access_token}'
 
-recharge_booster_payload = {
-    "operationName": "telegramGameActivateBooster",
-    "variables": {"boosterType": "Recharge"},
-    "query": QUERY_BOOSTER
-}
+    recharge_booster_payload = {
+        "operationName": "telegramGameActivateBooster",
+        "variables": {"boosterType": "Recharge"},
+        "query": QUERY_BOOSTER
+    }
 
-response = safe_post(url, headers, recharge_booster_payload)
-if response and 'data' in response and response['data'] and 'telegramGameActivateBooster' in response['data']:
-    new_energy = response['data']['telegramGameActivateBooster']['currentEnergy']
-    print(f"\n🔋 Energy recharged. Current energy: {new_energy}")
-else:
-    print("❌ Failed to activate Recharge Booster: Incomplete or missing data.")
+    response = safe_post(url, headers, recharge_booster_payload)
+    if response and 'data' in response and response['data'] and 'telegramGameActivateBooster' in response['data']:
+        new_energy = response['data']['telegramGameActivateBooster']['currentEnergy']
+        print(f"\n🔋 Energy refilled. Current energy: {new_energy}")
+    else:
+        print("❌ Failed to activate Recharge Booster: Data incomplete or missing.")
 
 def activate_booster(index, headers):
     access_token = fetch(index + 1)
     url = "api-gw-tg.memefi.club"
     print("\r🚀 Activating Turbo Boost ... ", end="", flush=True)
 
-    headers = headers_set.copy()  # Make a copy of headers_set to avoid changing the global variable
+    headers = headers_set.copy()  # Create a copy of headers_set so as not to modify the global variable
     headers['Authorization'] = f'Bearer {access_token}'
 
     recharge_booster_payload = {
@@ -199,7 +170,7 @@ def activate_booster(index, headers):
         current_health = response['data']['telegramGameActivateBooster']['currentBoss']['currentHealth']
         current_level = response['data']['telegramGameActivateBooster']['currentBoss']['level']
         if current_health == 0:
-            print("\nBoss defeated, setting next boss...")
+            print("\nBoss has been defeated, setting the next boss...")
             set_next_boss(index, headers)
         else:
             if god_mode == 'y':
@@ -222,7 +193,7 @@ def activate_booster(index, headers):
                     if 'data' in tap_result and 'telegramGameProcessTapsBatch' in tap_result['data']:
                         tap_data = tap_result['data']['telegramGameProcessTapsBatch']
                         if tap_data['currentBoss']['currentHealth'] == 0:
-                            print("\nBoss defeated, setting next boss...")
+                            print("\nBoss has been defeated, setting the next boss...")
                             set_next_boss(index, headers)
                             print(f"\rTapped ✅ Coin: {tap_data['coinsAmount']}, Monster ⚔️: {tap_data['currentBoss']['currentHealth']} - {tap_data['currentBoss']['maxHealth']}    ")
                 else:
@@ -240,35 +211,35 @@ def submit_taps(index, json_payload):
     response = safe_post(url, headers, json_payload)
     print(response)
     if response:
-        return response  # Make sure to return the parsed data
+        return response  # Pastikan mengembalikan data yang sudah diurai
     else:
-        print(f"❌ Failed with status {response}, trying again...")
-        return None  # Return None if an error occurs
+        print(f"❌ Gagal dengan status {response}, mencoba lagi...")
+        return None  # Mengembalikan None jika terjadi error
 
 def set_next_boss(index, headers):
     access_token = fetch(index + 1)
     url = "api-gw-tg.memefi.club"
 
-    headers = headers_set.copy()  # Make a copy of headers_set to avoid changing the global variable
-    headers['Authorization'] = f'Bearer {access_token}'
-    boss_payload = {
-        "operationName": "telegramGameSetNextBoss",
-        "variables": {},
-        "query": QUERY_NEXT_BOSS
-    }
+   headers = headers_set.copy()  # Create a copy of headers_set so as not to modify the global variable
+headers['Authorization'] = f'Bearer {access_token}'
+boss_payload = {
+    "operationName": "telegramGameSetNextBoss",
+    "variables": {},
+    "query": QUERY_NEXT_BOSS
+}
 
-    response = safe_post(url, headers, boss_payload)
-    if response and 'data' in response:
-        print("✅ Successfully set next boss.", flush=True)
-    else:
-        print("❌ Failed to set next boss.", flush=True)
+response = safe_post(url, headers, boss_payload)
+if response and 'data' in response:
+    print("✅ Successfully changed boss.", flush=True)
+else:
+    print("❌ Failed to change boss.", flush=True)
 
-# Check user stats
+# Check status
 def cek_stat(index, headers):
     access_token = fetch(index + 1)
     url = "api-gw-tg.memefi.club"
 
-    headers = headers_set.copy()  # Make a copy of headers_set to avoid modifying the global variable
+    headers = headers_set.copy()  # Create a copy of headers_set so as not to modify the global variable
     headers['Authorization'] = f'Bearer {access_token}'
 
     json_payload = {
@@ -285,10 +256,9 @@ def cek_stat(index, headers):
         print(f"❌ Failed with status {response}")
         return None  # Return None if an error occurs
 
-# Check and complete tasks
 def check_and_complete_tasks(index, headers):
     access_token = fetch(index + 1)
-    headers = headers_set.copy()  # Make a copy of headers_set to avoid modifying the global variable
+    headers = headers_set.copy()  # Create a copy of headers_set so as not to modify the global variable
     headers['Authorization'] = f'Bearer {access_token}'
     task_list_payload = {
         "operationName": "GetTasksList",
@@ -305,7 +275,7 @@ def check_and_complete_tasks(index, headers):
 
     all_completed = all(task['status'] == 'Completed' for task in tasks['data']['campaignTasks'])
     if all_completed:
-        print(f"\r[ Account {index + 1} ] All tasks are completed. ✅            ", flush=True)
+        print(f"\r[ Account {index + 1} ] All tasks completed. ✅            ", flush=True)
         return True
 
     print(f"\n[ Account {index + 1} ]\nTask List:\n")
@@ -314,7 +284,7 @@ def check_and_complete_tasks(index, headers):
 
         if task['name'] == "Follow telegram channel" and task['status'] == "Pending":
             print(f"⏩ Skipping task: {task['name']}")
-            continue  # Skip task if the task name is "Follow telegram channel" and status is "Pending"
+            continue  # Skip task if the task name is "Follow telegram channel" and its status is "Pending"
 
         if task['status'] == "Pending":
             print(f"\🔍 Viewing task: {task['name']}", end="", flush=True)
@@ -342,7 +312,7 @@ def check_and_complete_tasks(index, headers):
                 print(f"\r❌ {task['name']} | Failed to move to Verification", flush=True)
                 print(verify_response)
 
-    # Re-check tasks after moving to verification
+    # Re-check tasks after moving them to verification
     updated_tasks = safe_post(url, headers, task_list_payload)
     print("\nUpdated Task List After Verification:\n")
     for task in updated_tasks['data']['campaignTasks']:
@@ -360,7 +330,8 @@ def check_and_complete_tasks(index, headers):
             else:
                 print(f"\r❌ {task['name']} | Failed to complete            ", flush=True)
 
-    return False
+   
+return False
 
 def main():
     print("Starting Memefi bot...")
@@ -370,32 +341,32 @@ def main():
         with open('query_id.txt', 'r') as file:
             lines = file.readlines()
 
-        # Collect account information first
+        # Gather account information first
         accounts = []
         for index, line in enumerate(lines):
-            result = cek_user(index)
+            result = check_user(index)
             if result is not None:
                 first_name = result.get('firstName', 'Unknown')
                 last_name = result.get('lastName', 'Unknown')
                 league = result.get('league', 'Unknown')
                 accounts.append((index, result, first_name, last_name, league))
             else:
-                print(f"❌ Account {index + 1}: Token is invalid or an error occurred")
+                print(f"❌ Account {index + 1}: Token is not valid or an error occurred")
 
-        # Display account list
+        # Display the account list
         print("\rAccount list:                                   ", flush=True)
         for index, _, first_name, last_name, league in accounts:
             print(f"✅ [ Account {first_name} {last_name} ] | League 🏆 {league}")
 
         # After displaying all accounts, start checking tasks
         for index, result, first_name, last_name, league in accounts:
-            print(f"\r[ Account {index + 1} ] {first_name} {last_name} checking tasks...", end="", flush=True)
+            print(f"\r[ Account {index + 1} ] {first_name} {last_name} checking task...", end="", flush=True)
             headers = {'Authorization': f'Bearer {result}'}
-            if cek_task_enable == 'y':
+            if check_task_enable == 'y':
                 check_and_complete_tasks(index, headers)
             else:
-                print(f"\r\n[ Account {index + 1} ] {first_name} {last_name} Task check skipped\n", flush=True)
-            stat_result = cek_stat(index, headers)
+                print(f"\r\n[ Account {index + 1} ] {first_name} {last_name} Check task skipped\n", flush=True)
+            stat_result = check_stat(index, headers)
 
             if stat_result is not None:
                 user_data = stat_result
@@ -411,7 +382,7 @@ def main():
                 boss_health = user_data['currentBoss']['currentHealth']
 
                 if boss_health == 0:
-                    print("\nBoss has been defeated, setting the next boss...", flush=True)
+                    print("\nBoss has been defeated, setting next boss...", flush=True)
                     set_next_boss(index, headers)
                 print("\rTapping 👆", end="", flush=True)
 
@@ -427,7 +398,7 @@ def main():
                             activate_energy_recharge_booster(index, headers)
                             continue  # Continue tapping after recharge
                         else:
-                            print("\r🪫 Energy Depleted, no booster available. Switching to the next account.\n", flush=True)
+                            print("\r🪫 Energy Depleted, no boosters available. Switching to the next account.\n", flush=True)
                             continue  # Switch to the next account
                     else:
                         print("\r🪫 Energy Depleted, auto booster disabled. Switching to the next account.\n", flush=True)
@@ -447,7 +418,7 @@ def main():
                 if tap_result is not None:
                     print(f"\rTapped ✅\n ")
                 else:
-                    print(f"❌ Failed with status {tap_result}, retrying...")
+                    print(f"❌ Failed with status {tap_result}, trying again...")
 
                 if auto_claim_combo == 'y':
                     claim_combo(index, headers)
@@ -455,16 +426,17 @@ def main():
                     if user_data['freeBoosts']['currentTurboAmount'] > 0:
                         activate_booster(index, headers)
 
-        print("=== [ ALL ACCOUNTS PROCESSED ] ===")
+        print("=== [ ALL ACCOUNTS HAVE BEEN PROCESSED ] ===")
 
         animate_energy_recharge(15)
 
-# Run the main() function and save the result
+# Run the main() function and save the results
+
 
 def claim_combo(index, headers):
     access_token = fetch(index + 1)
     url = "api-gw-tg.memefi.club"
-    headers = headers_set.copy()  # Make a copy of headers_set to avoid modifying the global variable
+    headers = headers_set.copy()  # Create a copy of headers_set to avoid changing the global variable
     headers['Authorization'] = f'Bearer {access_token}'
 
     nonce = generate_random_nonce()
@@ -529,11 +501,11 @@ def claim_combo(index, headers):
     if response and 'data' in response and 'telegramGameProcessTapsBatch' in response['data']:
         game_data = response['data']['telegramGameProcessTapsBatch']
         if game_data['tapsReward'] is None:
-            print("❌ Combo has already been claimed: No reward available.")
+            print("❌ Combo has already been claimed: No rewards available.")
         else:
-            print(f"✅ Combo claimed successfully: Taps reward {game_data['tapsReward']}")
+            print(f"✅ Combo claimed successfully: Reward taps {game_data['tapsReward']}")
     else:
-        print("❌ Failed to claim combo: Data is incomplete or unavailable.")
+        print("❌ Failed to claim combo: Incomplete or no data.")
 
 def animate_energy_recharge(duration):
     frames = ["|", "/", "-", "\\"]
@@ -541,11 +513,11 @@ def animate_energy_recharge(duration):
     while time.time() < end_time:
         remaining_time = int(end_time - time.time())
         for frame in frames:
-            print(f"\r🪫 Recharging energy {frame} - Remaining {remaining_time} seconds         ", end="", flush=True)
+            print(f"\r🪫 Recharging energy {frame} - {remaining_time} seconds remaining         ", end="", flush=True)
             time.sleep(0.25)
     print("\r🔋 Energy recharge complete.                            ", flush=True)
 
-cek_task_enable = 'n'
+check_task_enable = 'n'
 while True:
     auto_booster = input("Use Energy Booster (default n) ? (y/n): ").strip().lower()
     if auto_booster in ['y', 'n', '']:
@@ -588,5 +560,5 @@ if auto_claim_combo == 'y':
         else:
             print("Enter a valid combo.")
 
-# Run the main() function and save
+# Run the main() function and save the results
 main()
