@@ -20,27 +20,8 @@ def load_proxies():
 proxies = load_proxies()
 
 
-#def art():
-    GREEN = Fore.GREEN
-    RED = Fore.LIGHTRED_EX
-    BLUE = Fore.CYAN
-    YELLOW = Fore.YELLOW
-    RESET = Style.RESET_ALL
-
-    print(f"{GREEN}███    ███ ███████ ███    ███ ███████ ███████ {RESET}")
-print(f"{GREEN}████  ████ ██      ████  ████ ██      ██      {RESET}")
-print(f"{YELLOW}██ ████ ██ █████   ██ ████ ██ █████   ███████ {RESET}")
-print(f"{RED}██  ██  ██ ██      ██  ██  ██ ██           ██ {RESET}")
-print(f"{RED}██      ██ ███████ ██      ██ ███████ ███████ {RESET}/n")
-
-    print(f"{YELLOW} Made and written by {BLUE}ZERO CODES{RESET} {RED}||{RESET} {BLUE}@zerodcode{RESET}")
-    print(f"{GREEN} Join Telegram group: {YELLOW} https://t.me/+FfYIYEJSKQFhZmRk{RESET}\n")
-
-    print(f"{RED}➡Auto claim{RESET}")
-    print(f"{GREEN}➡Auto tasks{RESET}")
-    print(f"{BLUE}➡Auto spin{RESET}") 
+    #HANDLE ALL ERRORS PUT THEM HERE SAFE_POST
     
-    HANDLE ALL ERRORS PUT THEM HERE SAFE_POST
 def safe_post(url, headers, json_payload):
     retries = 5
     timeout = 5  # Timeout in seconds for each connection attempt
@@ -68,7 +49,17 @@ def safe_post(url, headers, json_payload):
             res = conn.getresponse()
             response_data = res.read().decode("utf-8")
             if res.status == 200:
-                return json.loads(response_data)  # Return the JSON response if successful
+                
+            # Assign access_token if it's in the response
+            json_data = json.loads(response_data)
+            if 'data' in json_data and 'accessToken' in json_data['data']:
+                global access_token
+                access_token = json_data['data']['accessToken']
+                print(f"Access token retrieved: {access_token}")
+            else:
+                print("Failed to retrieve access token.")
+            return json_data
+      # Return the JSON response if successful
             else:
                 print(f"❌ Failed with status {res.status}, trying again")
         except (http.client.HTTPException, TimeoutError) as e:
@@ -85,7 +76,10 @@ def generate_random_nonce(length=52):
     return ''.join(random.choice(characters) for _ in range(length))
 
 # Get access token
+
 def fetch(account_line):
+    global access_token  # Declare access_token as global to use it throughout the script
+    
     with open('query_id.txt', 'r') as file:
         lines = file.readlines()
         raw_data = lines[account_line - 1].strip()
@@ -367,7 +361,8 @@ def check_and_complete_tasks(index, headers):
                 print(f"\r❌ {task['name']} | Failed to complete            ", flush=True)
 
     return False
-def main():
+
+def main():
     print("Starting Memefi bot...")
     print("\r Getting valid account list...", end="", flush=True)
   
